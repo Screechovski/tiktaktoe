@@ -1,6 +1,8 @@
 backend/node_modules
 backend/dist
 backend/package-lock.json
+backend/database.sqlite
+backend/local.database.sqlite
 frontend/node_modules
 frontend/package-lock.json
 frontend/dist
