@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="e00cf224-ab4e-465b-a7ee-2956f27483ff" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/postcss.config.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/public/vite.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/App.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/app.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/assets/svelte.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/icons/host-icon.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/icons/user-icon.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/lib/AuthPage.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/lib/GamePage.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/lib/LivingRoom.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/lib/LobbyItem.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/lib/LobbyList.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/lib/LobbyUser.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/lib/MenuBlock.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/lib/ModalBlock.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/lib/PulseLoader.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/lib/UserBlock.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/main.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/store/auth.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/store/game.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/store/lobbies.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/store/menu.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/store/root.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/store/socket.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/store/user.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/types.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/ui/SButton.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/ui/SInput.svelte" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/validation.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/src/vite-env.d.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/svelte.config.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/tailwind.config.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/tsconfig.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/tsconfig.node.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../client/vite.config.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../main.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../readme.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../services/emoji.service.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../services/game.service.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../services/lobby.service.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../services/user.service.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../services/validation.service.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../tsconfig.json" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2UnlNLr3NP605C6KPyytxbLOKbO" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "go.import.settings.migrated": "true",
+    "last_opened_file_path": "C:/Users/webde",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
+  }
+}]]></component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VgoProject">
+    <settings-migrated>true</settings-migrated>
+  </component>
+</project>

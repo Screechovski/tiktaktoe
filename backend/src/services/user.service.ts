@@ -1,4 +1,7 @@
+import { UserEntity } from "../entity/user.entity";
+import { AppDataSource } from "./db.service";
 import { getEmoji } from "./emoji.service";
+import { createHash } from "./hash.service";
 
 export type UserSafe = {
   id: number;
@@ -9,14 +12,11 @@ export type UserSafe = {
   draw: number;
 };
 
-export type UserPrivate = UserSafe & {
+export type UserPrivate = UserEntity & {
   send: (d: string) => void;
-  ip: string;
-  isOnline: boolean;
 };
 
-const userStore = new Map<string, UserPrivate>();
-let userId = 100;
+const userStore = new Map<number, UserPrivate>();
 
 export function hasUser(ip: string): boolean {
   return userStore.has(ip);
@@ -48,54 +48,52 @@ export function toSafeUser(user: UserPrivate): UserSafe {
   };
 }
 
-export function createUser(ip: string, name: string, send: (d: string) => void) {
+export async function createUser(
+  ip: string,
+  pName: string,
+  send: (d: string) => void
+) {
   userStore.forEach((user) => {
     if (user.ip === ip) {
       throw new Error("User already exists");
     }
-    if (user.name === name) {
+    if (user.name === pName) {
       throw new Error("User name already exists");
     }
   });
 
-  let user = {
-    id: userId,
-    ip,
-    emoji: getEmoji(),
-    name: `${name}[${ip}]`,
-    send,
-    isOnline: true,
-    win: 0,
-    lose: 0,
-    draw: 0,
-  };
+  const emoji = getEmoji();
+  const name = `${pName}[${ip}]`;
+  const hashedIp = await createHash(ip);
 
-  userStore.set(ip, user);
-  userId += 1;
+  const userEntity = AppDataSource.getRepository(UserEntity).create({
+    emoji,
+    name,
+    ip: hashedIp,
+  });
+  const insertedUser =
+    await AppDataSource.getRepository(UserEntity).save(userEntity);
+  const augmentedUser = { ...insertedUser, send };
 
-  return user;
+  userStore.set(insertedUser.id, augmentedUser);
+
+  return augmentedUser;
 }
 
 export function getOnlineUsers(): UserPrivate[] {
-  const privateUsers: UserPrivate[] = []
+  const privateUsers: UserPrivate[] = [];
 
   userStore.forEach((user) => {
     if (user.isOnline) {
-      privateUsers.push(user)
+      privateUsers.push(user);
     }
-  })
+  });
 
   return privateUsers;
 }
 
-export function setIsOnline(ip: string) {
-  let user = getUser(ip);
-
-  user.isOnline = true;
-}
-
-export function setIsOffline(ip: string) {
-  let user = getUser(ip);
+export async function setIsOffline(ip: string) {
+  const hashedIp = await createHash(ip);
 
   user.isOnline = false;
 }

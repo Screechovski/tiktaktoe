@@ -26,16 +26,16 @@ let lobbyCounter = 1;
 const lobbyStore = new Map<number, LobbyPrivate>();
 
 export function getLobbies(): LobbyPrivate[] {
-  const lobbies: LobbyPrivate[] = []
+  const lobbies: LobbyPrivate[] = [];
 
   lobbyStore.forEach((lobby) => {
-    lobbies.push(lobby)
-  })
+    lobbies.push(lobby);
+  });
 
   return lobbies;
 }
 
-export function hasLobby(lobbyId: number){
+export function hasLobby(lobbyId: number) {
   return lobbyStore.has(lobbyId);
 }
 
@@ -63,15 +63,15 @@ export function toSafeLobby(lobby: LobbyPrivate): LobbySafe {
   };
 }
 
-export function createLobby(name: string, password: string, user: UserPrivate){
+export function createLobby(name: string, password: string, user: UserPrivate) {
   lobbyStore.forEach((lobby) => {
     if (lobby.name === name) {
       throw new Error("Lobby with the same name already exists");
     }
-    if (lobby.users.find(insideUser => insideUser.ip === user.ip)) {
+    if (lobby.users.find((insideUser) => insideUser.ip === user.ip)) {
       throw new Error("You already in lobby");
     }
-  })
+  });
 
   const lobby: LobbyPrivate = {
     id: lobbyCounter,
@@ -79,27 +79,32 @@ export function createLobby(name: string, password: string, user: UserPrivate){
     password,
     isPrivate: password !== "",
     gameId: -1,
-    users: [{
-      ...user,
-      isReady: false,
-      isHost: true,
-      isPlay: false,
-    }]
-  }
+    users: [
+      {
+        ...user,
+        isReady: false,
+        isHost: true,
+        isPlay: false,
+      },
+    ],
+  };
 
-  lobbyStore.set(lobbyCounter, lobby)
+  lobbyStore.set(lobbyCounter, lobby);
   lobbyCounter += 1;
 
   return lobby;
 }
 
-
-export function joinLobby(lobbyId: number, password: string, user: UserPrivate): LobbyPrivate {
+export function joinLobby(
+  lobbyId: number,
+  password: string,
+  user: UserPrivate
+): LobbyPrivate {
   lobbyStore.forEach((lobby) => {
-    if (lobby.users.find(insideUser => insideUser.ip === user.ip)) {
+    if (lobby.users.find((insideUser) => insideUser.ip === user.ip)) {
       throw new Error("You already in lobby");
     }
-  })
+  });
 
   const lobby = getLobby(lobbyId);
 
@@ -123,13 +128,16 @@ export function joinLobby(lobbyId: number, password: string, user: UserPrivate):
   return lobby;
 }
 
-export function kickUserFromLobby(lobbyId: number, ip: string): LobbyPrivate | null {
-  let lobby = getLobby(lobbyId);
+export function kickUserFromLobby(
+  lobbyId: number,
+  ip: string
+): LobbyPrivate | null {
+  const lobby = getLobby(lobbyId);
 
-  lobby.users = lobby.users.filter(user => user.ip !== ip);
+  lobby.users = lobby.users.filter((user) => user.ip !== ip);
 
   if (lobby.users.length === 0) {
-    lobbyStore.delete(lobbyId)
+    lobbyStore.delete(lobbyId);
     return null;
   }
 
@@ -140,8 +148,8 @@ export function kickUserFromAllLobbies(ip: string): LobbyPrivate | null {
   for (const storeItem of lobbyStore) {
     const [key, lobby] = storeItem;
 
-    if (lobby.users.find(user => user.ip === ip)) {
-      lobby.users = lobby.users.filter(user => user.ip !== ip);
+    if (lobby.users.find((user) => user.ip === ip)) {
+      lobby.users = lobby.users.filter((user) => user.ip !== ip);
 
       if (lobby.users.length === 0) {
         lobbyStore.delete(key);
@@ -152,5 +160,5 @@ export function kickUserFromAllLobbies(ip: string): LobbyPrivate | null {
     }
   }
 
-  return null
+  return null;
 }

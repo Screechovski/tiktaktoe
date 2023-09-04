@@ -1,4 +1,4 @@
-const emojis = [
+let emojis: string[] = [
   "😀",
   "😃",
   "😄",
@@ -64,7 +64,6 @@ const emojis = [
   "😕",
   "😟",
   "🙁",
-  "😮",
   "😯",
   "😲",
   "😳",
@@ -90,14 +89,28 @@ const emojis = [
   "🤬",
   "😈",
   "👿",
-  "🤡"
-]
+  "🤡",
+];
+
+let usedEmoji: string[] = [];
+
+export function _test_getEmojiCount(): number {
+  return emojis.length;
+}
 
 export function getEmoji(): string {
-  const emojiId = Math.floor(Math.random() * emojis.length);
-  const emoji = emojis[emojiId];
+  let emoji: string;
 
-  emojis.splice(emojiId, 1)
+  if (emojis.length === 1) {
+    emoji = emojis[0];
+    emojis = usedEmoji;
+    usedEmoji = [];
+  } else {
+    const emojiId = Math.floor(Math.random() * emojis.length);
+    emoji = emojis[emojiId];
+    usedEmoji.push(emoji);
+    emojis.splice(emojiId, 1);
+  }
 
   return emoji;
 }

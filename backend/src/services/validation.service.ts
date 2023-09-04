@@ -1,4 +1,4 @@
-import { validation, validationKeys } from "../client/src/validation";
+import { validation, validationKeys } from "../common";
 
 export function checkValidation(
   validationKey: (typeof validationKeys)[number],

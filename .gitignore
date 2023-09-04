@@ -1,4 +1,6 @@
-package-lock.json
-dist
-node_modules
-client/.vscode
+backend/node_modules
+backend/dist
+backend/package-lock.json
+frontend/node_modules
+frontend/package-lock.json
+frontend/dist

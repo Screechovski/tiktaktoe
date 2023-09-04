@@ -1,60 +1,59 @@
-export type GameGridValue = -1 | 0 | 1
+export type GameGridValue = -1 | 0 | 1;
 
 export type GameGrid = {
-  value:  GameGridValue;
+  value: GameGridValue;
   ownerIp?: string;
-}
+};
 
 export type Game = {
   id: number;
   grid: GameGrid[][];
 };
 
-const gameList = new Map<number, Game>()
+const gameList = new Map<number, Game>();
 let gameId = 100;
 
-function createGrid(size = 3){
-  let res: Game["grid"] = [];
+function createGrid(size = 3) {
+  const res: Game["grid"] = [];
 
   for (let i = 0; i < size; i++) {
-    let row: GameGrid[] = [];
+    const row: GameGrid[] = [];
 
     for (let j = 0; j < size; j++) {
-      const obj: GameGrid = { value: -1 }
+      const obj: GameGrid = { value: -1 };
       row.push(obj);
     }
 
-    res.push(row)
+    res.push(row);
   }
 
   return res;
 }
 
 export function initGame(): Game {
-
   const game: Game = {
     id: gameId,
-    grid: createGrid(3) as Game["grid"],
+    grid: createGrid(3),
   };
 
-  gameList.set(gameId, game)
+  gameList.set(gameId, game);
   gameId += 1;
 
-  return game
+  return game;
 }
 
-export function hasGame(gameId: number){
-  return gameList.has(gameId)
+export function hasGame(gameId: number) {
+  return gameList.has(gameId);
 }
 
 export function getGame(gameId: number): Game {
   if (!gameList.has(gameId)) {
     throw new Error("Game not found");
   }
-  return gameList.get(gameId) as Game
+  return gameList.get(gameId) as Game;
 }
 
-export function isGameEnded(gameId: number): boolean {
+export function cellsIsFilled(gameId: number): boolean {
   const game = getGame(gameId).grid;
 
   for (let i = 0; i < game.length; i++) {
@@ -117,11 +116,29 @@ export function canMakeStep(gameId: number, i: number, j: number): boolean {
 }
 
 // FIXME fix 5 shit
-export function makeGameStep(gameId: number, i: number, j: number, isCross: boolean, ownerIp: string): Game {
+export function makeGameStep(
+  gameId: number,
+  i: number,
+  j: number,
+  isCross: boolean,
+  ownerIp: string
+): Game {
   const pastGame = getGame(gameId);
 
   pastGame.grid[i][j].value = isCross ? 1 : 0;
   pastGame.grid[i][j].ownerIp = ownerIp;
 
   return pastGame;
+}
+
+export function removeGame(gameId: number) {
+  const findedGame = getGame(gameId);
+
+  gameList.delete(findedGame.id);
+}
+
+export function _test_restartGame(gameId: number) {
+  const findedGame = getGame(gameId);
+
+  findedGame.grid = createGrid(3);
 }

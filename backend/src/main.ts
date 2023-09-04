@@ -1,5 +1,3 @@
-import { validation } from "./client/src/validation";
-import { SocketMessage, WSM } from "./client/src/types";
 import express from "express";
 import http from "http";
 import WebSocket from "ws";
@@ -14,7 +12,6 @@ import {
 } from "./services/user.service";
 import {
   createLobby,
-  getLobbies,
   getLobby,
   getSafeLobbies,
   joinLobby,
@@ -22,13 +19,21 @@ import {
   kickUserFromLobby,
 } from "./services/lobby.service";
 import { checkValidation } from "./services/validation.service";
-import { canMakeStep, getWinnerIp, initGame, isGameEnded, makeGameStep } from "./services/game.service";
+import {
+  canMakeStep,
+  getWinnerIp,
+  initGame,
+  cellsIsFilled,
+  makeGameStep,
+} from "./services/game.service";
+import { SocketMessage, WSM } from "./common";
+import { AppDataSource } from "./services/db.service";
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const msg = (type: WSM, data: any = null) => JSON.stringify({ type, data });
+const msg = (type: WSM, data: unknown = null) => JSON.stringify({ type, data });
 
 function authHandler(ws: WebSocket, ip: string, name: string) {
   try {
@@ -55,7 +60,7 @@ function lobbyCreateHandler(
     const user = getUser(ip);
     const lobby = createLobby(name, password, user);
 
-    wss.clients.forEach((client) =>
+    wss.clients.forEach((client: WebSocket) =>
       client.send(msg(WSM.LOBBY, getSafeLobbies()))
     );
     ws.send(msg(WSM.LOBBY_IN, lobby.id));
@@ -109,7 +114,7 @@ function userReadyHandler(ws: WebSocket, ip: string, lobbyId: number) {
       if (user.ip === ip) {
         user.isReady = true;
       }
-    })
+    });
 
     ws.send(msg(WSM.GAME_INIT_NOT));
 
@@ -129,60 +134,65 @@ function userReadyHandler(ws: WebSocket, ip: string, lobbyId: number) {
     wss.clients.forEach((client) =>
       client.send(msg(WSM.LOBBY, getSafeLobbies()))
     );
-  }
-   catch (error) {
+  } catch (error) {
     ws.send(msg(WSM.GAME_READY_ERROR, (error as Error).message));
   }
 }
 
-function userStepHandler(ws: WebSocket, ip: string, lobbyId: number, i: number, j: number){
+function userStepHandler(
+  ws: WebSocket,
+  ip: string,
+  lobbyId: number,
+  i: number,
+  j: number
+) {
   try {
     const lobby = getLobby(lobbyId);
-    const user = lobby.users.find(u => u.ip === ip);
+    const user = lobby.users.find((u) => u.ip === ip);
     if (user === undefined) {
       throw new Error("user not found");
     }
     if (!user.isPlay) {
-      return
+      return;
     }
     if (!canMakeStep(lobby.gameId, i, j)) {
-      return
+      return;
     }
 
     const game = makeGameStep(lobby.gameId, i, j, user.isHost, ip);
-    const isEnd = isGameEnded(lobby.gameId);
+    const isEnd = cellsIsFilled(lobby.gameId);
     const winnerIp = getWinnerIp(lobby.gameId);
 
     if (isEnd || winnerIp !== "") {
-      lobby.users.forEach(u => {
+      lobby.users.forEach((u) => {
         u.isPlay = false;
         u.send(msg(WSM.GAME, game));
-      })
+      });
       if (winnerIp === "") {
-        lobby.users.forEach(u => {
+        lobby.users.forEach((u) => {
           u.draw += 1;
           u.send(msg(WSM.GAME_END, 0));
-        })
+        });
       } else {
-        lobby.users.forEach(u => {
-          const isWin = (winnerIp === u.ip);
+        lobby.users.forEach((u) => {
+          const isWin = winnerIp === u.ip;
           if (isWin) u.win += 1;
           else u.lose += 1;
-          u.send(msg(WSM.GAME_END, isWin ? 1  : -1));
-        })
+          u.send(msg(WSM.GAME_END, isWin ? 1 : -1));
+        });
       }
-      lobby.users.forEach(u => {
+      lobby.users.forEach((u) => {
         u.send(msg(WSM.USER, toSafeUser(u)));
         u.send(msg(WSM.LOBBY, getSafeLobbies()));
-      })
+      });
     } else {
-      lobby.users.forEach(u => {
+      lobby.users.forEach((u) => {
         u.isPlay = !u.isPlay;
-      })
-      lobby.users.forEach(u => {
+      });
+      lobby.users.forEach((u) => {
         u.send(msg(WSM.LOBBY, getSafeLobbies()));
         u.send(msg(WSM.GAME, game));
-      })
+      });
     }
   } catch (error) {
     console.log("ERROR, ", error);
@@ -191,7 +201,7 @@ function userStepHandler(ws: WebSocket, ip: string, lobbyId: number, i: number, 
 }
 
 function socketMessageHandler(ws: WebSocket, ip: string) {
-  return function (message: any) {
+  return function (message: WebSocket.RawData) {
     const parsedMessage: SocketMessage = JSON.parse(message.toString());
     const d = parsedMessage.data;
 
@@ -257,6 +267,8 @@ app.get("/", (_, res) => {
   res.send("Hello World! 1");
 });
 
-server.listen(8080, () => {
-  console.log("Express WebSocket server is running on port 8080");
+AppDataSource.initialize().then(() => {
+  server.listen(8080, () => {
+    console.log("Express WebSocket server is running on port 8080");
+  });
 });
