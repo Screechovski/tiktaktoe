@@ -5,6 +5,8 @@
   import SButton from "../ui/SButton.svelte";
   import SInput from "../ui/SInput.svelte";
   import ModalBlock from "./ModalBlock.svelte";
+  import OpenIcon from "../icons/open-icon.svelte";
+  import LockIcon from "../icons/lock-icon.svelte";
 
   export let lobby: Lobby;
   let showPassField = false;
@@ -53,11 +55,14 @@
       <SButton>join</SButton>
     </form>
   </ModalBlock>
+
   {#if $lobbies.joinError}
-    <p>{$lobbies.joinError}</p>
+    <p class="error-line">{$lobbies.joinError}</p>
   {/if}
 
-  <div class="flex gap-4">
+  <div class="lobby-item">
+    <span class="lobby-item__status">{lobby.status}</span>
+
     <div class="flex flex-col">
       {#if hasFirstPlayer()}
         <span>{getFirstPlayer().name}</span>
@@ -67,11 +72,15 @@
       {/if}
     </div>
 
-    <div>
+    <div class="lobby-item__name">
       <span>{lobby.name}</span>
-      <span class="font-semibold">
-        {lobby.isPrivate ? "private" : "open"}
-      </span>
+      <i class="lobby-item__private-icon">
+        {#if lobby.isPrivate}
+          <LockIcon />
+        {:else}
+          <OpenIcon />
+        {/if}
+      </i>
     </div>
 
     <div class="flex flex-col">
@@ -84,3 +93,22 @@
     </div>
   </div>
 </div>
+
+<style lang="scss">
+  .lobby-item {
+    @apply flex gap-4 relative pt-5 px-3 pb-3 bg-slate-700 rounded-xl;
+
+    &__status {
+      @apply absolute top-0;
+      left: 50%;
+    }
+
+    &__name {
+      @apply flex gap-2 items-center;
+    }
+
+    &__private-icon {
+      @apply block w-7 h-7;
+    }
+  }
+</style>

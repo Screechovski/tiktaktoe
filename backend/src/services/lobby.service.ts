@@ -1,5 +1,7 @@
 import type { UserPrivate, UserSafe } from "./user.service";
 
+type Status = "waiting" | "process" | "end";
+
 export type UserLobby<T> = T & {
   isReady: boolean;
   isHost: boolean;
@@ -11,6 +13,7 @@ export type LobbySafe = {
   name: string;
   users: UserLobby<UserSafe>[];
   isPrivate: boolean;
+  status: Status;
 };
 
 export type LobbyPrivate = {
@@ -20,6 +23,8 @@ export type LobbyPrivate = {
   users: UserLobby<UserPrivate>[];
   password: string;
   gameId: number;
+  status: Status;
+  send(s: string | string[]): void;
 };
 
 let lobbyCounter = 1;
@@ -60,6 +65,7 @@ export function toSafeLobby(lobby: LobbyPrivate): LobbySafe {
     name: lobby.name,
     users: lobby.users,
     isPrivate: lobby.isPrivate,
+    status: lobby.status,
   };
 }
 
@@ -79,6 +85,7 @@ export function createLobby(name: string, password: string, user: UserPrivate) {
     password,
     isPrivate: password !== "",
     gameId: -1,
+    status: "waiting",
     users: [
       {
         ...user,
@@ -87,6 +94,17 @@ export function createLobby(name: string, password: string, user: UserPrivate) {
         isPlay: false,
       },
     ],
+    send(s: string | string[]){
+      if (Array.isArray(s)){
+        this.users.forEach((u) => {
+          s.forEach((m) => u.send(m))
+        })
+      } else {
+        this.users.forEach((u) => {
+          u.send(s)
+        })
+      }
+    }
   };
 
   lobbyStore.set(lobbyCounter, lobby);

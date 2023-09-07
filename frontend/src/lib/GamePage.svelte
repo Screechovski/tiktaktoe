@@ -65,11 +65,11 @@
       {#if $gameIsEnd}
         <p class="game-grid__end-game">
           {#if $statusGame === 1}
-            <span class="win">WIN</span>
+            <span class="win">✨WIN🎉</span>
           {:else if $statusGame === -1}
-            <span class="lose">LOSE</span>
+            <span class="lose">😔LOSE🤕</span>
           {:else}
-            <span class="draw">DRAW</span>
+            <span class="draw">😐DRAW❓</span>
           {/if}
           <span>GAME END</span>
         </p>
@@ -82,12 +82,19 @@
               class="game-grid__button"
               on:click={() => stepHandler(i, j)}
             >
-              {item.value}
+              {#if item.value === 1}
+                <span>❌</span>
+              {:else if item.value === 0}
+                <span>⭕️</span>
+              {/if}
             </button>
           {/each}
         {/each}
       {:else}
-        <PulseLoader />
+        <div class="flex flex-col gap-3 items-center">
+          <PulseLoader />
+          <span>Waiting for an opponent</span>
+        </div>
       {/if}
     </div>
 
@@ -134,10 +141,10 @@
 
   .game-page-area {
     width: 900px;
-    @apply flex;
+    @apply flex justify-between items-center;
 
     &__user-wrapper {
-      width: fit-content;
+      width: 250px;
     }
   }
 
@@ -145,11 +152,12 @@
     @apply grid gap-2 w-fit relative;
 
     &__end-game {
-      @apply absolute flex flex-col z-10 rounded-xl bg-white bg-opacity-20 items-center justify-center;
+      @apply absolute flex flex-col z-10 rounded-xl bg-white bg-opacity-20 items-center justify-end;
       width: 200%;
       left: -50%;
-      height: calc(100% + 40px);
+      height: calc(100% + 120px);
       top: -20px;
+      padding-bottom: 20px;
 
       span:first-child {
         letter-spacing: 2px;

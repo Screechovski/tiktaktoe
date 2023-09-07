@@ -6,6 +6,7 @@ export type Lobby = {
   name: string;
   users: UserLobby[];
   isPrivate: boolean;
+  status: "waiting" | "process" | "end"
 };
 
 type State = {

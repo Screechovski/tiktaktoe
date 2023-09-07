@@ -32,12 +32,12 @@
           bind:value={$createPassword}
         />
 
+        {#if createError}
+          <p class="error-line">{$createError}</p>
+        {/if}
+
         <SButton disabled={$createDisabled}>Create</SButton>
       </form>
-
-      {#if createError}
-        <p>{$createError}</p>
-      {/if}
     </div>
   </ModalBlock>
 

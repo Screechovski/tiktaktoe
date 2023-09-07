@@ -2,3 +2,4 @@ node_modules
 client
 webpack.config.js
 src/test
+src/lcov-report

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { onDestroy } from "svelte";
   import Portal from "svelte-portal";
 
@@ -7,10 +7,11 @@
 
   $: isOpenChange = () => {
     if (isOpen) {
-      main.classList.add("blur");
+      main!.classList.add("blur");
     } else {
-      main.classList.remove("blur");
+      main!.classList.remove("blur");
     }
+    return "";
   };
 
   function close() {
@@ -18,7 +19,7 @@
   }
 
   onDestroy(() => {
-    main.classList.remove("blur");
+    main!.classList.remove("blur");
   });
 </script>
 
@@ -48,7 +49,7 @@
     }
 
     &__inner {
-      @apply relative p-6;
+      @apply relative p-8;
       z-index: 3;
     }
   }

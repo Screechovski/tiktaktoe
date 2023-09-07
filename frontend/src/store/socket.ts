@@ -112,22 +112,20 @@ export function initSocket() {
   };
 }
 
-export function sendAuth(name: string) {
-  if (socket) {
-    socket.send(JSON.stringify({ type: WSM.AUTH, data: name }));
-    return;
+function getSocket(){
+  if (socket){
+    return socket;
   }
-  console.warn("socket is not inited");
+  throw new Error("Socket is not inited")
+}
+
+export function sendAuth(name: string) {
+  getSocket().send(JSON.stringify({ type: WSM.AUTH, data: name }));
 }
 
 export function sendLobby(name: string, password: string) {
-  if (socket) {
-    socket.send(
-      JSON.stringify({ type: WSM.LOBBY_CREATE, data: { name, password } })
-    );
-    return;
-  }
-  console.warn("socket is not inited");
+  getSocket().send(
+    JSON.stringify({ type: WSM.LOBBY_CREATE, data: { name, password } }));
 }
 
 export function joinLobby(id: number, password: string) {

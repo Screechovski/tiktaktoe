@@ -27,7 +27,7 @@ import {
   makeGameStep,
 } from "./services/game.service";
 import { SocketMessage, WSM } from "./common";
-import { AppDataSource } from "./services/db.service";
+import { DBInstance } from "./services/db.service";
 
 const app = express();
 const server = http.createServer(app);
@@ -35,20 +35,24 @@ const wss = new WebSocket.Server({ server });
 
 const msg = (type: WSM, data: unknown = null) => JSON.stringify({ type, data });
 
-function authHandler(ws: WebSocket, ip: string, name: string) {
+function getMessageFromError(error: any): string {
+  return (error as Error).message;
+}
+
+async function authHandler(ws: WebSocket, ip: string, name: string) {
   try {
     checkValidation("userName", name);
-    const user = createUser(ip, name, ws.send.bind(ws));
+    const user = await createUser(ip, name, ws.send.bind(ws));
 
     ws.send(msg(WSM.USER, toSafeUser(user)));
     ws.send(msg(WSM.LOBBY, getSafeLobbies()));
     ws.send(msg(WSM.STATUS, true));
   } catch (error) {
-    ws.send(msg(WSM.AUTH_ERROR, (error as Error).message));
+    ws.send(msg(WSM.AUTH_ERROR, getMessageFromError(error)));
   }
 }
 
-function lobbyCreateHandler(
+async function lobbyCreateHandler(
   ws: WebSocket,
   ip: string,
   name: string,
@@ -57,7 +61,7 @@ function lobbyCreateHandler(
   try {
     checkValidation("lobbyName", name);
     checkValidation("lobbyPassword", password);
-    const user = getUser(ip);
+    const user = await getUser(ip);
     const lobby = createLobby(name, password, user);
 
     wss.clients.forEach((client: WebSocket) =>
@@ -65,11 +69,13 @@ function lobbyCreateHandler(
     );
     ws.send(msg(WSM.LOBBY_IN, lobby.id));
   } catch (error) {
-    ws.send(msg(WSM.LOBBY_CREATE_ERROR, (error as Error).message));
+    console.log({error});
+
+    ws.send(msg(WSM.LOBBY_CREATE_ERROR, getMessageFromError(error)));
   }
 }
 
-function lobbyInHandler(
+async function lobbyInHandler(
   ws: WebSocket,
   ip: string,
   id: number,
@@ -77,17 +83,24 @@ function lobbyInHandler(
 ) {
   try {
     checkValidation("lobbyPassword", password);
-    const user = getUser(ip);
-    const lobby = joinLobby(id, password, user);
+    const user = await getUser(ip);
+    let lobby = getLobby(id);
+    if (lobby.status === "end") {
+      throw new Error("Game is end");
+    }
+    if (lobby.status === "process") {
+      throw new Error("Game is started");
+    }
+    lobby = joinLobby(id, password, user);
     wss.clients.forEach((client) =>
       client.send(msg(WSM.LOBBY, getSafeLobbies()))
     );
     ws.send(msg(WSM.LOBBY_IN, id));
     if (lobby.users.length === 2) {
-      lobby.users.forEach((user) => user.send(msg(WSM.GAME_INIT, lobby.id)));
+      lobby.send(msg(WSM.GAME_INIT, lobby.id));
     }
   } catch (error) {
-    ws.send(msg(WSM.LOBBY_IN_ERROR, (error as Error).message));
+    ws.send(msg(WSM.LOBBY_IN_ERROR, getMessageFromError(error)));
   }
 }
 
@@ -95,14 +108,14 @@ function lobbyOutHandler(ws: WebSocket, ip: string, lobbyId: number) {
   try {
     const lobby = kickUserFromLobby(lobbyId, ip);
     if (lobby !== null) {
-      lobby.users.forEach((user) => user.send(msg(WSM.GAME_INIT_NOT)));
+      lobby.send(msg(WSM.GAME_INIT_NOT));
     }
     wss.clients.forEach((client) =>
       client.send(msg(WSM.LOBBY, getSafeLobbies()))
     );
     ws.send(msg(WSM.LOBBY_OUT));
   } catch (error) {
-    ws.send(msg(WSM.LOBBY_OUT_ERROR, (error as Error).message));
+    ws.send(msg(WSM.LOBBY_OUT_ERROR, getMessageFromError(error)));
   }
 }
 
@@ -122,7 +135,8 @@ function userReadyHandler(ws: WebSocket, ip: string, lobbyId: number) {
       const game = initGame();
 
       lobby.gameId = game.id;
-      lobby.users.forEach((user) => user.send(msg(WSM.GAME_START, game.grid)));
+      lobby.send(msg(WSM.GAME_START, game.grid))
+      lobby.status = "process";
 
       const user = lobby.users.find((user) => user.isHost);
 
@@ -135,10 +149,11 @@ function userReadyHandler(ws: WebSocket, ip: string, lobbyId: number) {
       client.send(msg(WSM.LOBBY, getSafeLobbies()))
     );
   } catch (error) {
-    ws.send(msg(WSM.GAME_READY_ERROR, (error as Error).message));
+    ws.send(msg(WSM.GAME_READY_ERROR, getMessageFromError(error)));
   }
 }
 
+// TODO need refactor, hard to read
 function userStepHandler(
   ws: WebSocket,
   ip: string,
@@ -164,6 +179,7 @@ function userStepHandler(
     const winnerIp = getWinnerIp(lobby.gameId);
 
     if (isEnd || winnerIp !== "") {
+      lobby.status = "end";
       lobby.users.forEach((u) => {
         u.isPlay = false;
         u.send(msg(WSM.GAME, game));
@@ -180,23 +196,21 @@ function userStepHandler(
           else u.lose += 1;
           u.send(msg(WSM.GAME_END, isWin ? 1 : -1));
         });
+        // lobby.users.forEach((u) => userSync(u.ip))
       }
       lobby.users.forEach((u) => {
         u.send(msg(WSM.USER, toSafeUser(u)));
-        u.send(msg(WSM.LOBBY, getSafeLobbies()));
       });
     } else {
       lobby.users.forEach((u) => {
         u.isPlay = !u.isPlay;
       });
-      lobby.users.forEach((u) => {
-        u.send(msg(WSM.LOBBY, getSafeLobbies()));
-        u.send(msg(WSM.GAME, game));
-      });
+      lobby.send(msg(WSM.GAME, game));
     }
+    wss.clients.forEach(c => c.send(msg(WSM.LOBBY, getSafeLobbies())))
   } catch (error) {
     console.log("ERROR, ", error);
-    ws.send(msg(WSM.GAME_STEP_ERROR, (error as Error).message));
+    ws.send(msg(WSM.GAME_STEP_ERROR, getMessageFromError(error)));
   }
 }
 
@@ -237,11 +251,12 @@ function socketMessageHandler(ws: WebSocket, ip: string) {
   };
 }
 
-wss.on("connection", (ws: WebSocket, req) => {
+wss.on("connection", async (ws: WebSocket, req) => {
   const ip = `${req.socket.remoteAddress}:${req.socket.remotePort}`;
+  // const ip = `${req.socket.remoteAddress}`;
 
-  if (hasUser(ip)) {
-    setIsOnline(ip);
+  if (await hasUser(ip)) {
+    setIsOnline(ip, ws.send.bind(ws));
     ws.send(msg(WSM.USER, getSafeUser(ip)));
     ws.send(msg(WSM.LOBBY, getSafeLobbies()));
     ws.send(msg(WSM.STATUS, true));
@@ -251,8 +266,8 @@ wss.on("connection", (ws: WebSocket, req) => {
 
   ws.on("message", socketMessageHandler(ws, ip));
 
-  ws.on("close", () => {
-    if (hasUser(ip)) {
+  ws.on("close", async () => {
+    if (await hasUser(ip)) {
       setIsOffline(ip);
       const lobby = kickUserFromAllLobbies(ip);
       if (lobby !== null) {
@@ -267,7 +282,7 @@ app.get("/", (_, res) => {
   res.send("Hello World! 1");
 });
 
-AppDataSource.initialize().then(() => {
+DBInstance.initialize().then(() => {
   server.listen(8080, () => {
     console.log("Express WebSocket server is running on port 8080");
   });

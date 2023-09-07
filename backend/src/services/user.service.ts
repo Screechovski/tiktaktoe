@@ -1,43 +1,46 @@
 import { UserEntity } from "../entity/user.entity";
-import { AppDataSource } from "./db.service";
+import { DBInstance } from "./db.service";
 import { getEmoji } from "./emoji.service";
-import { createHash } from "./hash.service";
 
-export type UserSafe = {
-  id: number;
-  emoji: string;
-  name: string;
-  win: number;
-  lose: number;
-  draw: number;
-};
+type Send = (d: string) => void;
+
+export type UserSafe = Omit<UserEntity, "ip">;
 
 export type UserPrivate = UserEntity & {
-  send: (d: string) => void;
+  send: Send;
 };
 
-const userStore = new Map<number, UserPrivate>();
+const onlineUsers = new Map<string, UserPrivate>();
 
-export function hasUser(ip: string): boolean {
-  return userStore.has(ip);
+export async function hasUser(ip: string): Promise<boolean> {
+ const user =  await DBInstance.getRepository(UserEntity).findOne({ where: { ip } })
+
+ return user !== null;
 }
 
-export function getUser(ip: string): UserPrivate {
-  if (!hasUser(ip)) {
-    throw new Error("User not found");
+export async function getUser(ip: string): Promise<UserPrivate> {
+  if (!(await hasUser(ip))) {
+    throw new Error("User not found in bd")
   }
-  return userStore.get(ip) as UserPrivate;
+
+  if (!onlineUsers.has(ip)) {
+    throw new Error("User offline")
+  }
+
+  const user = onlineUsers.get(ip);
+
+  if (user === undefined) {
+    throw new Error("User not found")
+  }
+
+  return user;
 }
 
-export function getSafeUser(ip: string): UserSafe {
-  return toSafeUser(getUser(ip));
+export async function getSafeUser(ip: string): Promise<UserSafe> {
+  return toSafeUser(await getUser(ip));
 }
 
-export function getAllUsers(): UserPrivate[] {
-  return Object.values(userStore);
-}
-
-export function toSafeUser(user: UserPrivate): UserSafe {
+export function toSafeUser(user: UserEntity | UserPrivate): UserSafe {
   return {
     id: user.id,
     emoji: user.emoji,
@@ -50,50 +53,85 @@ export function toSafeUser(user: UserPrivate): UserSafe {
 
 export async function createUser(
   ip: string,
-  pName: string,
+  name: string,
   send: (d: string) => void
 ) {
-  userStore.forEach((user) => {
-    if (user.ip === ip) {
-      throw new Error("User already exists");
-    }
-    if (user.name === pName) {
-      throw new Error("User name already exists");
-    }
-  });
+  const user = await DBInstance.getRepository(UserEntity).findOne({where: { ip }})
+
+  if (user !== null) {
+    throw new Error("User already exist")
+  }
+
+  const userWithTheSameName = await DBInstance.getRepository(UserEntity).findOne({where: { name }})
+
+  if (userWithTheSameName !== null) {
+    throw new Error("User with the same name already exists")
+  }
 
   const emoji = getEmoji();
-  const name = `${pName}[${ip}]`;
-  const hashedIp = await createHash(ip);
 
-  const userEntity = AppDataSource.getRepository(UserEntity).create({
+  const userEntity = DBInstance.getRepository(UserEntity).create({
     emoji,
-    name,
-    ip: hashedIp,
+    name: `${name}[${ip}]`,
+    ip,
   });
-  const insertedUser =
-    await AppDataSource.getRepository(UserEntity).save(userEntity);
+  const insertedUser = await DBInstance.getRepository(UserEntity).save(userEntity);
   const augmentedUser = { ...insertedUser, send };
 
-  userStore.set(insertedUser.id, augmentedUser);
+  onlineUsers.set(ip, augmentedUser);
 
   return augmentedUser;
 }
 
 export function getOnlineUsers(): UserPrivate[] {
-  const privateUsers: UserPrivate[] = [];
+  const users: UserPrivate[] = []
 
-  userStore.forEach((user) => {
-    if (user.isOnline) {
-      privateUsers.push(user);
-    }
-  });
+  onlineUsers.forEach((_, ip) => {
+    users.push(user)
+  })
 
-  return privateUsers;
+  return users
 }
 
 export async function setIsOffline(ip: string) {
-  const hashedIp = await createHash(ip);
+  if (!hasUser(ip)) {
+    throw new Error("User not found");
+  }
+  onlineUsers.delete(ip);
+}
 
-  user.isOnline = false;
+export async function setIsOnline(ip: string, send: (d: string) => void) {
+  if (!(await hasUser(ip))) {
+    throw new Error("User not found");
+  }
+  const user = await getUser(ip);
+
+  onlineUsers.set(ip, {
+    ...user,
+    send
+  })
+}
+
+export async function userSync(ip: string){
+  const dbUser = await DBInstance.getRepository(UserEntity).findOne({where: { ip }});
+
+  if (dbUser === null) {
+    throw new Error("User not found");
+  }
+
+  const localUser = onlineUsers.get(ip);
+
+  if (localUser === undefined) {
+    throw new Error("User not found");
+  }
+
+  await DBInstance.getRepository(UserEntity).save({
+    id: localUser.id,
+    ip: localUser.ip,
+    draw: localUser.draw,
+    win: localUser.win,
+    lose: localUser.lose
+  })
+
+  // AppDataSource.getRepository(UserEntity)
 }

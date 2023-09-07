@@ -3,7 +3,7 @@
 @tailwind base;
 
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Source Code Pro', monospace;
   line-height: 1.5;
   font-weight: 400;
   font-size: 14px;
@@ -31,4 +31,8 @@ html {
 
 .blur {
   filter: blur(2px);
+}
+
+.error-line {
+  @apply text-red-600 italic font-bold;
 }

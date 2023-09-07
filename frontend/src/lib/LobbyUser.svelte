@@ -67,6 +67,8 @@
 
   .lobby-user {
     @apply flex flex-col gap-2 bg-slate-700 p-4 rounded-lg relative;
+    border: 3px solid;
+    border-color: transparent;
 
     &__filter {
       @apply absolute inset-0 w-full h-full bg-white opacity-20;
@@ -76,7 +78,6 @@
     }
 
     &__active {
-      border: 3px solid;
       @apply border-green-700;
     }
 
@@ -100,9 +101,12 @@
   }
 
   .status {
+    display: block;
     font-size: 0.8rem;
     letter-spacing: 0.1em;
-    @apply py-0.5 px-2 text-slate-300 absolute bottom-0 right-0 rounded-tl-lg font-semibold;
+    bottom: -3px;
+    right: -3px;
+    @apply py-0.5 px-2 text-slate-300 absolute rounded-tl-lg rounded-br-lg font-semibold;
 
     &--ready {
       @apply bg-green-700;
