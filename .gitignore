@@ -10,3 +10,4 @@ frontend/package-lock.json
 frontend/dist
 frontend/.idea
 frontend/.vscode
+.idea
