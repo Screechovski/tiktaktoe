@@ -17,9 +17,9 @@ function clickHandler(e) {
 
 <div>
     <ul>
-        <li>1</li>
-        <li>2</li>
-        <li>3</li>
+        <li class="item">1</li>
+        <li class="item">2</li>
+        <li class="item">3</li>
     </ul>
 </div>
 
