@@ -2,7 +2,7 @@
 import { createEventDispatcher } from "svelte";
 
 export let disabled = false;
-export let type: "button" | "submit" | "reset" = "submit";
+export let type: "button" | "submit" = "submit";
 
 const dispatch = createEventDispatcher();
 
