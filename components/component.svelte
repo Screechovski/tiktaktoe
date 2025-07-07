@@ -7,8 +7,11 @@ export let type: "button" | "submit" | "reset" = "submit";
 const dispatch = createEventDispatcher();
 
 function clickHandler(e) {
-    if (!disabled) dispatch("click");
-    else e.preventDefault();
+    if (!disabled) {
+        dispatch("click")
+    } else {
+        e.preventDefault();
+    }
 }
 </script>
 
