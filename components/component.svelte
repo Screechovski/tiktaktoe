@@ -15,10 +15,12 @@ function clickHandler(e) {
 }
 </script>
 
-<div {type} class="s-button" on:click={clickHandler} {disabled}>
-<span>
-    <slot />
-</span>
+<div class="wrapper">
+    <ul class="list-inline">
+        <li class="item">1</li>
+        <li class="item">2</li>
+        <li class="item">3</li>
+    </ul>
 </div>
 
 <style lang="scss">
