@@ -16,7 +16,7 @@ function clickHandler(e) {
 </script>
 
 <div>
-    <ul>
+    <ul class="list-inline">
         <li class="item">1</li>
         <li class="item">2</li>
         <li class="item">3</li>
